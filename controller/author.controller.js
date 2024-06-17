@@ -45,3 +45,32 @@ const createAuthorTable = async () => {
 };
 
 createAuthorTable();
+
+
+const insertAuthor = async (firstname, lastname, email, birth_date, bio) => {
+    const qr = `insert into author(firstname, lastname, email, birth_date, bio) values('${firstname}', '${lastname}', '${email}', '${birth_date}', '${bio}')`;
+
+    try {
+        const result = await query(qr);
+        if (result) {
+            return result;
+        } else {
+            return "Error";
+        }
+    } catch (error) {
+        return error;
+    } finally {
+        db.end((err) => {
+            if (err) {
+                console.log(err) ; 
+            }
+            console.log("insert author connection close");
+        })
+    }
+}
+
+
+
+module.exports = {
+    insertAuthor
+}
