@@ -1,15 +1,5 @@
 const db = require('../config/config');
 
-const query = async (sql) => {
-    return new Promise((resolve, reject) => {
-        db.query(sql, (err, res) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve(res);
-        });
-    });
-};
 
 const createAuthorTable = async () => {
     const qr = `
@@ -25,7 +15,7 @@ const createAuthorTable = async () => {
     )
     `;
     try {
-        const table = await query(qr);
+        const table = await db.query(qr);
 
         if (table) {
             console.log('Table created');
@@ -44,33 +34,79 @@ const createAuthorTable = async () => {
     }
 };
 
-createAuthorTable();
+// createAuthorTable();
 
 
-const insertAuthor = async (firstname, lastname, email, birth_date, bio) => {
-    const qr = `insert into author(firstname, lastname, email, birth_date, bio) values('${firstname}', '${lastname}', '${email}', '${birth_date}', '${bio}')`;
+const insertAuthor = async(req,res)=>{
+    const {firstname,lastname,email,birth_date,bio} = req.body
+    db.query(`insert into author (firstname,lastname,email,birth_date,bio) values ('${firstname}','${lastname}','${email}','${birth_date}','${bio}')`,(err,result)=>{
+        if (err) {
+            return err;
+        }   
+        res.status(200).json({message:result})
+    });
 
-    try {
-        const result = await query(qr);
-        if (result) {
-            return result;
-        } else {
-            return "Error";
+}
+// add author 
+
+
+
+// insertAuthor('abc','xyz','ax@gmail.com', '27-06-2000', 'jjfidfdies')
+
+
+// get all author 
+
+const getAllAuthor = async(req,res) => {
+    db.query(`select * from author` , (err,result)=>{
+        if(err){
+            return err 
         }
-    } catch (error) {
-        return error;
-    } finally {
-        db.end((err) => {
-            if (err) {
-                console.log(err) ; 
-            }
-            console.log("insert author connection close");
-        })
-    }
+        res.status(200).json({message : result}) ; 
+    })
 }
 
 
+const updateAuthor = async(req,res) => {
+    const {id} = req.params ; 
+    const {firstname , lastname, email, birth_date, bio} = req.body ; 
+
+    await db.query(`update author set firstname = '${firstname}', lastname = '${lastname}', email = '${email}', birth_date = '${birth_date}', bio = '${bio}' where id = ${id}`, (err,result) => {
+        if(err) { 
+            res.status(400).json({message : err})
+            return err ; 
+        }
+        res.status(200).json({message : result})
+    })
+}
+
+const deleteAuthor = async(req,res) => {
+    const {id} = req.params ; 
+    await db.query(`delete from author where id = '${id}'`,(err,result) => {
+        if(err){
+            res.status(400).json({message : err});
+            return err ; 
+        }
+        res.status(200).json({message : result}) ; 
+    });
+}
+
+
+const getAuthorById = async(req,res) => {
+    const {id} = req.params ; 
+    await db.query(`select * from author where id=${id}`, (err,result)=>{
+        if(err){
+            res.status(400).json({message : err});
+            return err;
+        }
+        res.status(200).json({message :result});
+    })
+}
+
 
 module.exports = {
-    insertAuthor
+    insertAuthor,
+    getAllAuthor,
+    updateAuthor,
+    deleteAuthor,
+    getAuthorById
 }
