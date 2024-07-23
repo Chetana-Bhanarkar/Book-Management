@@ -1,1 +1,1 @@
-"Book hub "
+"Book hub"
